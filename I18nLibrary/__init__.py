@@ -16,7 +16,7 @@ import i18n
 from robot.libraries.BuiltIn import BuiltIn
 
 
-__version__ = '0.1.0'
+__version__ = '0.1.2'
 
 class I18nLibrary:
     """
