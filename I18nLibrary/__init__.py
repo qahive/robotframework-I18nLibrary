@@ -13,6 +13,8 @@
 # limitations under the License.
 import os
 import i18n
+from robot.libraries.BuiltIn import BuiltIn
+
 
 __version__ = '0.1.0'
 
@@ -23,6 +25,8 @@ class I18nLibrary:
     def __init__(self):
         i18n.config.set('enable_memoization', True)
         i18n.config.set('pre_load_langs', [])
+        i18n.set('prefer', '')
+        i18n.set('is_prefer', False)
         i18n.resource_loader.init_yaml_loader()
 
     def load_path_append(self, append_path):
@@ -64,15 +68,38 @@ class I18nLibrary:
     def set_fallback_language(self, language):
         i18n.set('fallback', language)
 
+    def set_prefer_language(self, language):
+        i18n.set('prefer', language)
+        i18n.set('is_prefer', True)
+
     def translate_message(self, message):
         return i18n.t(message)
 
     def translate_message_for_specific_language(self, message, language):
         return i18n.t(message, locale=language)
 
-    def translate_message_with_prefer_second_layer_fallback(self, message, second_fallback):
+    def translate_message_with_prefer_language(self, message, second_fallback):
         return i18n.t(message, default=i18n.t(message, locale=second_fallback))
 
     def generate_test_variables(self):
+        robot_buildIn = BuiltIn()
+        is_prefer = i18n.get('is_prefer')
+        prefer_lang = i18n.get('prefer')
+        keys = self._get_all_unique_keys()
+        for key in keys:
+            value = ''
+            if is_prefer:
+                value = self.translate_message_with_prefer_language(key, prefer_lang)
+            else:
+                value = self.translate_message(key)
+            robot_buildIn.set_test_variable('${'+key+'}', value)
+
+    def _get_all_unique_keys(self):
+        key_list = []
         container = i18n.translations.container
-        return container
+        for lang in container.keys():
+            lang_dicts = container.get(lang)
+            key_list += list(lang_dicts.keys())
+        key_set = set(key_list)
+        key_unique_list = list(key_set)
+        return  key_unique_list
