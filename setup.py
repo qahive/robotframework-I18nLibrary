@@ -38,7 +38,8 @@ setup(
     keywords='robotframework testing automation data-driven qahive',
     platforms='any',
     install_requires=[
-        'python-I18nLibrary'
+        'python-i18n',
+        'PyYAML'
     ],
     python_requires='>3.5',
     test_suite='nose.collector',
