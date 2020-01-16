@@ -16,7 +16,7 @@ import i18n
 from robot.libraries.BuiltIn import BuiltIn
 
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 class I18nLibrary:
     """
@@ -81,7 +81,7 @@ class I18nLibrary:
     def translate_message_with_prefer_language(self, message, second_fallback):
         return i18n.t(message, default=i18n.t(message, locale=second_fallback))
 
-    def generate_test_variables(self):
+    def generate_suite_variables(self):
         robot_buildIn = BuiltIn()
         is_prefer = i18n.get('is_prefer')
         prefer_lang = i18n.get('prefer')
@@ -92,7 +92,7 @@ class I18nLibrary:
                 value = self.translate_message_with_prefer_language(key, prefer_lang)
             else:
                 value = self.translate_message(key)
-            robot_buildIn.set_test_variable('${'+key+'}', value)
+            robot_buildIn.set_suite_variable('${'+key+'}', value)
 
     def _get_all_unique_keys(self):
         key_list = []

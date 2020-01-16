@@ -17,7 +17,7 @@ Demo load language from yml file
     # Load path
     Load Path Append    ./Resources
     # Force generate test variables
-    ${x} =    Generate Test Variables
+    ${x} =    Generate Suite Variables
     # Log variables    
     Log Variables    
     Log    ${login.login}
