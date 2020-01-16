@@ -128,3 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .idea/
+Examples/.project
+Examples/.pydevproject
+Examples/log.html
+Examples/output.xml
+Examples/red.xml
+Examples/report.html

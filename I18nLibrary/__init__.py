@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import i18n
 
 __version__ = '0.1.0'
@@ -19,6 +20,10 @@ class I18nLibrary:
     """
     I18nLibrary translator library for support in robotframework
     """
+    def __init__(self):
+        i18n.config.set('enable_memoization', True)
+        i18n.config.set('pre_load_langs', [])
+        i18n.resource_loader.init_yaml_loader()
 
     def load_path_append(self, append_path):
         """
@@ -28,17 +33,46 @@ class I18nLibrary:
         """
         i18n.load_path.append(append_path)
 
+        # Load lang files to memory
+        for lang in i18n.config.get('pre_load_langs'):
+            i18n.resource_loader.load_directory(append_path, lang)
+            subfolders = self._get_list_of_sub_folders(append_path)
+            for folder_path in subfolders:
+                i18n.resource_loader.load_directory(folder_path, lang)
+
+    def _get_list_of_sub_folders(self, dirName):
+        listOfFile = os.listdir(dirName)
+        allFiles = list()
+        # Iterate over all the entries
+        for entry in listOfFile:
+            # Create full path
+            fullPath = os.path.join(dirName, entry)
+            # If entry is a directory then get the list of files in this directory
+            if os.path.isdir(fullPath):
+                allFiles.append(fullPath)
+                allFiles = allFiles + self._get_list_of_sub_folders(fullPath)
+        return allFiles
+
+    def set_pre_load_language(self, language):
+        langs = i18n.config.get('pre_load_langs')
+        langs.append(language)
+        i18n.config.set('pre_load_langs', langs)
+
     def set_locale_language(self, language):
         i18n.set('locale', language)
 
     def set_fallback_language(self, language):
         i18n.set('fallback', language)
 
-    def translate_message(self, messsage):
-        return i18n.t(messsage)
+    def translate_message(self, message):
+        return i18n.t(message)
 
-    def translate_message_for_specific_language(self, messsage, language):
-        return i18n.t(messsage, locale=language)
+    def translate_message_for_specific_language(self, message, language):
+        return i18n.t(message, locale=language)
 
     def translate_message_with_prefer_second_layer_fallback(self, message, second_fallback):
         return i18n.t(message, default=i18n.t(message, locale=second_fallback))
+
+    def generate_test_variables(self):
+        container = i18n.translations.container
+        return container
