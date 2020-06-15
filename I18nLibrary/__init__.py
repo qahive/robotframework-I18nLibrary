@@ -16,7 +16,7 @@ import i18n
 from robot.libraries.BuiltIn import BuiltIn
 
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 class I18nLibrary:
     """
@@ -39,10 +39,18 @@ class I18nLibrary:
 
         # Load lang files to memory
         for lang in i18n.config.get('pre_load_langs'):
-            i18n.resource_loader.load_directory(append_path, lang)
+            self._load_directory(append_path, lang)
             subfolders = self._get_list_of_sub_folders(append_path)
             for folder_path in subfolders:
-                i18n.resource_loader.load_directory(folder_path, lang)
+                self._load_directory(folder_path, lang)
+
+    def _load_directory(self, directory, locale):
+        for f in os.listdir(directory):
+            path = os.path.join(directory, f)
+            if os.path.isfile(path) and path.endswith(i18n.config.get('file_format')):
+                if '{locale}' in i18n.config.get('filename_format') and not locale+'.yml' in f:
+                    continue
+                i18n.resource_loader.load_translation_file(f, directory, locale)
 
     def _get_list_of_sub_folders(self, dirName):
         listOfFile = os.listdir(dirName)
@@ -87,12 +95,13 @@ class I18nLibrary:
         prefer_lang = i18n.get('prefer')
         keys = self._get_all_unique_keys()
         for key in keys:
+            robot_buildIn.log('Generate variable for '+ key)
             value = ''
             if is_prefer:
                 value = self.translate_message_with_prefer_language(key, prefer_lang)
             else:
                 value = self.translate_message(key)
-            robot_buildIn.set_suite_variable('${'+key+'}', value)
+            robot_buildIn.set_suite_variable('${'+key+'}', ""+value)
 
     def _get_all_unique_keys(self):
         key_list = []
